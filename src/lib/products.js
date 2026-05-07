@@ -11,9 +11,6 @@ export async function getProducts({ status, category_id, search, page = 1, limit
     .from('products')
     .select('*, categories(name)', { count: 'exact' })
 
-  // Only apply status filter if it's NOT 'All'
-  // Note: if the 'status' column is completely missing from DB, 
-  // any query using it will error. 
   if (status && status !== 'All') {
     if (status === 'Low Stock') {
       query = query.lt('stock', 10)
@@ -56,48 +53,73 @@ export async function getProductById(id) {
 }
 
 /**
- * Create new product
+ * Create new product - THE ULTIMATE VERSION
  */
 export async function createProduct(productData) {
-  const { data: userData } = await supabase.auth.getUser()
-  if (!userData?.user) throw new Error('Not authenticated')
+  console.log('🚀 [createProduct] Input data:', productData);
+  
+  try {
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData?.user) {
+      throw new Error('Auth session invalid. Please log out and log back in.');
+    }
 
-  // Slug generation helper
-  const generateSlug = (name) => {
-    return name
+    // Slug generation
+    const slug = productData.name
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
-      .concat('-', Math.random().toString(36).substring(2, 7))
-  }
+      .concat('-', Math.random().toString(36).substring(2, 7));
 
-  const payload = {
-    ...productData,
-    slug: generateSlug(productData.name),
-    created_by: userData.user.id
-  }
-
-  const { data: product, error } = await supabase
-    .from('products')
-    .insert(payload)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  // If opening stock > 0, insert a stock movement
-  if (product.stock > 0) {
-    await supabase.from('stock_movements').insert({
-      product_id: product.id,
-      type: 'IN',
-      quantity: product.stock,
-      reason: 'Purchase',
-      note: 'Opening stock',
+    // CLEAN PAYLOAD: Only send columns that actually exist in the DB
+    const payload = {
+      name: productData.name,
+      description: productData.description || '',
+      category_id: productData.category_id,
+      brand: productData.brand || '',
+      unit: productData.unit || 'pcs',
+      unit_price: Number(productData.unit_price) || 0,
+      purchase_price: Number(productData.purchase_price) || 0,
+      discount: Number(productData.discount) || 0,
+      stock: Number(productData.stock) || 0,
+      low_stock_threshold: Number(productData.low_stock_threshold) || 10,
+      status: productData.status || 'Active',
+      images: productData.images || [],
+      variants: productData.variants || [],
+      slug: slug,
       created_by: userData.user.id
-    })
-  }
+    };
 
-  return product
+    console.log('📦 [createProduct] Final payload:', payload);
+
+    // Perform Insert with a safety timeout
+    const insertPromise = supabase
+      .from('products')
+      .insert(payload)
+      .select()
+      .single();
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), 25000)
+    );
+
+    const { data: product, error: insertError } = await Promise.race([insertPromise, timeoutPromise]);
+
+    if (insertError) {
+      console.error('❌ [createProduct] Database Error:', insertError);
+      // More user-friendly error messages
+      if (insertError.code === '23503') throw new Error('Selected category is invalid or was deleted.');
+      if (insertError.code === '23505') throw new Error('A product with this name or SKU already exists.');
+      throw new Error(insertError.message || 'Failed to save product.');
+    }
+
+    console.log('✅ [createProduct] SUCCESS:', product);
+    return product;
+    
+  } catch (err) {
+    console.error('💥 [createProduct] CRITICAL:', err);
+    throw err;
+  }
 }
 
 /**
@@ -133,15 +155,12 @@ export async function deleteProduct(id) {
  */
 export async function duplicateProduct(id) {
   const product = await getProductById(id)
-  
-  // Strip unique/meta fields
   const { id: _, sku: __, slug: ___, created_at: ____, updated_at: _____, categories: ______, ...baseData } = product
   
   return createProduct({
     ...baseData,
     name: `${baseData.name} (Copy)`,
-    status: 'Inactive',
-    stock: 0 // Duplicates should start with 0 stock
+    stock: 0 
   })
 }
 
@@ -160,10 +179,9 @@ export async function getProductStats() {
 
   return (products || []).reduce((acc, p) => {
     acc.total++
-    // Use stock as a proxy for activity if status column is missing
     if (p.stock > 0) acc.active++
     if (p.stock <= 0) acc.outOfStock++
-    if (p.stock < (p.low_stock_threshold || 10) && p.stock > 0) acc.lowStock++
+    if (p.stock < 10 && p.stock > 0) acc.lowStock++
     return acc
   }, { total: 0, active: 0, outOfStock: 0, lowStock: 0 })
 }
@@ -202,7 +220,6 @@ export async function exportProductsCSV(filters = {}) {
     .from('products')
     .select('*, categories(name)')
 
-  if (filters.status && filters.status !== 'All') query = query.eq('status', filters.status)
   if (filters.category_id) query = query.eq('category_id', filters.category_id)
 
   const { data, error } = await query.order('name')
