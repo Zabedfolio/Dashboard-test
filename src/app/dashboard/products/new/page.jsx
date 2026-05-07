@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,19 +18,20 @@ export default function NewProductPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isFetchingCats, setIsFetchingCats] = useState(true)
 
-  useEffect(() => {
-    async function loadCats() {
-      try {
-        const data = await getCategories()
-        setCategories(data)
-      } catch (error) {
-        toast.error('Failed to load categories')
-      } finally {
-        setIsFetchingCats(false)
-      }
+  const loadCats = useCallback(async () => {
+    try {
+      const data = await getCategories()
+      setCategories(data)
+    } catch (error) {
+      toast.error('Failed to load categories')
+    } finally {
+      setIsFetchingCats(false)
     }
-    loadCats()
   }, [])
+
+  useEffect(() => {
+    loadCats()
+  }, [loadCats])
 
   const handleSubmit = async (data) => {
     setIsLoading(true)
@@ -72,6 +73,7 @@ export default function NewProductPage() {
         onSubmit={handleSubmit}
         isLoading={isLoading}
         isAdmin={profile?.role === 'admin'}
+        onRefreshCategories={loadCats}
       />
     </div>
   )

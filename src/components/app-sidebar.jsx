@@ -35,7 +35,6 @@ const items = [
   { title: "Orders", url: "/dashboard/orders", icon: ShoppingBag },
   { title: "Sales", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Invoices", url: "/dashboard/invoices", icon: FileText },
-  { title: "Inventory", url: "/dashboard/inventory", icon: Boxes },
   { title: "Products", url: "/dashboard/products", icon: Package },
   { title: "Customers", url: "/dashboard/customers", icon: Users },
   { title: "Expenses", url: "/dashboard/expenses", icon: Receipt },

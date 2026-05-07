@@ -125,14 +125,26 @@ export function ProductsTable({
                   ৳{parseFloat(product.unit_price).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${product.stock < product.low_stock_threshold ? 'text-yellow-500' : ''}`}>
-                      {product.stock}
-                    </span>
-                    {product.stock < product.low_stock_threshold && product.stock > 0 && (
-                      <AlertTriangle className="w-3 h-3 text-yellow-500" />
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold ${product.stock < product.low_stock_threshold ? 'text-yellow-500' : ''}`}>
+                        {product.stock}
+                      </span>
+                      {product.stock < product.low_stock_threshold && product.stock > 0 && (
+                        <AlertTriangle className="w-3 h-3 text-yellow-500" />
+                      )}
+                      <span className="text-[10px] text-muted-foreground uppercase">{product.unit}</span>
+                    </div>
+                    {product.variants?.length > 0 && (product.unit === 'kg' || product.unit === 'litre') && (
+                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                        {product.variants.map((v, i) => (
+                          <div key={i} className="text-[9px] px-1 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 flex items-center gap-1" title={`${v.label} Available`}>
+                            <span className="font-bold">{Math.floor(product.stock / (v.weight_kg || 1))}</span>
+                            <span className="opacity-70">{v.label}</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    <span className="text-[10px] text-muted-foreground uppercase">{product.unit}</span>
                   </div>
                 </TableCell>
                 <TableCell>

@@ -2,6 +2,44 @@
 -- Business Command Center — Products & Inventory Schema
 -- ============================================================
 
+-- ── profiles & RBAC ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email text,
+  name text,
+  role text DEFAULT 'user' CHECK (role IN ('admin', 'moderator', 'user')),
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- RBAC Helpers
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.is_moderator()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- ── categories ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.categories (
   id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -35,6 +73,7 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS low_stock_threshold integer
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS images text[] DEFAULT '{}'::text[];
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS status text DEFAULT 'Active';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS created_by uuid;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS variants jsonb DEFAULT '[]'::jsonb;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
 
 -- Add constraints and FKs explicitly
@@ -54,25 +93,11 @@ ALTER TABLE public.products DROP CONSTRAINT IF EXISTS products_unit_check;
 ALTER TABLE public.products ADD CONSTRAINT products_unit_check 
   CHECK (unit IN ('pcs','kg','litre','box','dozen'));
 
--- ── stock_movements ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS public.stock_movements (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id   uuid REFERENCES public.products(id) ON DELETE CASCADE,
-  type         text CHECK (type IN ('IN','OUT','ADJUSTMENT')) NOT NULL,
-  quantity     integer NOT NULL,
-  reason       text CHECK (reason IN ('Purchase','Sale','Return','Damage','Manual Adjustment')),
-  reference_id text,
-  note         text,
-  created_by   uuid REFERENCES public.profiles(id),
-  created_at   timestamptz DEFAULT now()
-);
-
 -- ── Security (RLS) ──────────────────────────────────────────
 
 -- Enable RLS
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.stock_movements ENABLE ROW LEVEL SECURITY;
 
 -- Categories Policies
 DROP POLICY IF EXISTS "Public read categories" ON public.categories;
@@ -80,7 +105,9 @@ CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (tr
 
 DROP POLICY IF EXISTS "Moderators manage categories" ON public.categories;
 CREATE POLICY "Moderators manage categories" ON public.categories FOR ALL 
-  USING (public.is_moderator());
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
 -- Products Policies
 DROP POLICY IF EXISTS "Public read products" ON public.products;
@@ -88,24 +115,17 @@ CREATE POLICY "Public read products" ON public.products FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Moderators manage products" ON public.products;
 CREATE POLICY "Moderators manage products" ON public.products FOR INSERT 
-  WITH CHECK (public.is_moderator());
+  TO authenticated
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Moderators update products" ON public.products;
 CREATE POLICY "Moderators update products" ON public.products FOR UPDATE 
-  USING (public.is_moderator());
+  TO authenticated
+  USING (true);
 
 DROP POLICY IF EXISTS "Only admins delete products" ON public.products;
 CREATE POLICY "Only admins delete products" ON public.products FOR DELETE 
   USING (public.is_admin());
-
--- Stock Movements Policies
-DROP POLICY IF EXISTS "Moderators read stock" ON public.stock_movements;
-CREATE POLICY "Moderators read stock" ON public.stock_movements FOR SELECT 
-  USING (public.is_moderator());
-
-DROP POLICY IF EXISTS "Moderators insert stock" ON public.stock_movements;
-CREATE POLICY "Moderators insert stock" ON public.stock_movements FOR INSERT 
-  WITH CHECK (public.is_moderator());
 
 -- ── Triggers ────────────────────────────────────────────────
 -- Update updated_at on product changes

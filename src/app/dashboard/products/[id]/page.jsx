@@ -17,8 +17,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProductForm } from '@/components/products/ProductForm'
-import { StockAdjustmentModal } from '@/components/products/StockAdjustmentModal'
-import { StockMovementHistory } from '@/components/products/StockMovementHistory'
 import { StatusBadge } from '@/components/products/StatusBadge'
 import { getProductById, updateProduct, deleteProduct, duplicateProduct } from '@/lib/products'
 import { getCategories } from '@/lib/categories'
@@ -36,7 +34,6 @@ export default function ProductDetailPage() {
   const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [isAdjModalOpen, setIsAdjModalOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     try {
@@ -147,16 +144,17 @@ export default function ProductDetailPage() {
             onSubmit={handleUpdate}
             isLoading={isUpdating}
             isAdmin={isAdmin}
+            onRefreshCategories={fetchData}
           />
         </div>
 
-        {/* Right: Stock & History */}
+        {/* Right: Stock Info */}
         <div className="space-y-6">
           <Card className="border-border/40 bg-card/40 overflow-hidden">
             <CardHeader className="bg-muted/30 pb-4">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <PackageCheck className="w-4 h-4 text-primary" />
-                STOCK OVERVIEW
+                STOCK LEVEL
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 text-center space-y-4">
@@ -169,44 +167,21 @@ export default function ProductDetailPage() {
                 <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-xl border border-yellow-500/20 flex items-center gap-3 text-left">
                   <AlertTriangle className="w-5 h-5 shrink-0" />
                   <p className="text-[11px] leading-tight font-medium">
-                    This product is below its low stock threshold ({product.low_stock_threshold}). Restock recommended.
+                    This product is below its low stock threshold ({product.low_stock_threshold}).
                   </p>
                 </div>
               )}
-
-              <Button className="w-full h-11" onClick={() => setIsAdjModalOpen(true)}>
-                <RefreshCw className="w-4 h-4 mr-2" /> Adjust Stock
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/40 bg-card/20">
-            <CardHeader className="pb-3 border-b border-border/10">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <History className="w-4 h-4 text-muted-foreground" />
-                MOVEMENT HISTORY
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <StockMovementHistory productId={id} />
             </CardContent>
           </Card>
 
           <Card className="border-border/40 bg-indigo-500/5 border-dashed">
             <CardContent className="p-6 text-center space-y-2">
               <p className="text-xs text-indigo-400 font-bold uppercase tracking-wider">Related Orders</p>
-              <p className="text-[10px] text-muted-foreground italic">Integration with Orders module coming soon.</p>
+              <p className="text-[10px] text-muted-foreground italic">Product usage in orders will appear here.</p>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      <StockAdjustmentModal 
-        isOpen={isAdjModalOpen}
-        onClose={() => setIsAdjModalOpen(false)}
-        product={product}
-        onSuccess={fetchData}
-      />
     </div>
   )
 }
