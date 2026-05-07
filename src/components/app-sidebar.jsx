@@ -38,7 +38,6 @@ const items = [
   { title: "Products", url: "/dashboard/products", icon: Package },
   { title: "Customers", url: "/dashboard/customers", icon: Users },
   { title: "Expenses", url: "/dashboard/expenses", icon: Receipt },
-  { title: "Reports", url: "/dashboard/reports", icon: BarChart3 },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 

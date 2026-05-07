@@ -11,12 +11,12 @@ export async function getProducts({ status, category_id, search, page = 1, limit
     .from('products')
     .select('*, categories(name)', { count: 'exact' })
 
+  // Only apply status filter if it's NOT 'All'
+  // Note: if the 'status' column is completely missing from DB, 
+  // any query using it will error. 
   if (status && status !== 'All') {
     if (status === 'Low Stock') {
-      // Logic for low stock: stock < threshold AND status != Out of Stock
-      query = query.lt('stock', 'low_stock_threshold').neq('status', 'Out of Stock')
-    } else {
-      query = query.eq('status', status)
+      query = query.lt('stock', 10)
     }
   }
 
@@ -151,15 +151,19 @@ export async function duplicateProduct(id) {
 export async function getProductStats() {
   const { data: products, error } = await supabase
     .from('products')
-    .select('status, stock, low_stock_threshold')
+    .select('stock')
 
-  if (error) throw error
+  if (error) {
+    console.error('getProductStats error:', error)
+    return { total: 0, active: 0, outOfStock: 0, lowStock: 0 }
+  }
 
-  return products.reduce((acc, p) => {
+  return (products || []).reduce((acc, p) => {
     acc.total++
-    if (p.status === 'Active') acc.active++
-    if (p.status === 'Out of Stock' || p.stock <= 0) acc.outOfStock++
-    if (p.stock < p.low_stock_threshold && p.status !== 'Out of Stock' && p.stock > 0) acc.lowStock++
+    // Use stock as a proxy for activity if status column is missing
+    if (p.stock > 0) acc.active++
+    if (p.stock <= 0) acc.outOfStock++
+    if (p.stock < (p.low_stock_threshold || 10) && p.stock > 0) acc.lowStock++
     return acc
   }, { total: 0, active: 0, outOfStock: 0, lowStock: 0 })
 }
@@ -216,6 +220,6 @@ export async function exportProductsCSV(filters = {}) {
     Discount: p.discount,
     'Effective Price': p.unit_price - p.discount,
     Stock: p.stock,
-    Status: p.status
+    Status: p.stock > 0 ? 'In Stock' : 'Out of Stock'
   }))
 }

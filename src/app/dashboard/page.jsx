@@ -3,7 +3,7 @@
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Wallet, Coins, AlertCircle } from "lucide-react";
+import { TrendingUp, Wallet, Coins, AlertCircle, Loader2, PieChart } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -15,157 +15,199 @@ import {
   BarChart,
   Bar } from
 "recharts";
-import { expenses, fmt, invoices, products, salesTrend, topProducts } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
+import { getDashboardStats, getSalesTrend } from "@/lib/dashboard";
+import { fmt } from "@/lib/mock-data";
 
 export default function DashboardPage() {
-  const todaySales = invoices.
-  filter((i) => i.date === new Date().toISOString().slice(0, 10)).
-  reduce((s, i) => s + i.total, 0);
-  const monthlyRevenue = invoices.reduce((s, i) => s + i.total, 0);
-  const totalCost = invoices.reduce(
-    (s, i) =>
-    s +
-    i.items.reduce((ss, it) => {
-      const p = products.find((p) => p.id === it.productId);
-      const v = p?.variants.find((v) => v.id === it.variantId);
-      return ss + (v?.costPrice ?? 0) * it.qty;
-    }, 0),
-    0
-  );
-  const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
-  const netProfit = monthlyRevenue - totalCost - totalExp;
-  const pendingDue = invoices.reduce((s, i) => s + i.due, 0);
-  const lowStock = products.flatMap((p) =>
-  p.variants.filter((v) => v.stock <= 10).map((v) => ({ p, v }))
-  );
+  const [stats, setStats] = useState({
+    todaySales: 0,
+    monthlyRevenue: 0,
+    netProfit: 0,
+    pendingDue: 0,
+    lowStock: [],
+    recentOrders: [],
+    customerReport: [],
+    totalOrdersCount: 0
+  });
+  const [trend, setTrend] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [s, t] = await Promise.all([
+          getDashboardStats(),
+          getSalesTrend()
+        ]);
+        if (s) setStats(s);
+        if (t) setTrend(t);
+      } catch (error) {
+        console.error("Dashboard load error:", error);
+        setErrorMsg(error.message || "Failed to connect to database");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-primary opacity-50" />
+        <p className="text-sm font-medium text-muted-foreground animate-pulse uppercase tracking-widest">Initializing Command Center...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-10">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight">COMMAND CENTER</h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold opacity-70">Real-time Business Performance</p>
+        </div>
+        {errorMsg && (
+          <Badge variant="destructive" className="animate-pulse bg-red-500/10 text-red-500 border-red-500/20">
+            <AlertCircle className="w-3 h-3 mr-1" /> DATABASE ERROR: {errorMsg}
+          </Badge>
+        )}
+      </div>
+
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Today Sales" value={fmt(todaySales)} delta="+12% vs yesterday" icon={TrendingUp} tone="primary" />
-        <StatCard label="Monthly Revenue" value={fmt(monthlyRevenue)} delta="This month" icon={Wallet} tone="success" />
-        <StatCard label="Net Profit" value={fmt(netProfit)} delta="Revenue - Cost - Expense" icon={Coins} tone="warning" />
-        <StatCard label="Pending Due" value={fmt(pendingDue)} delta={`${invoices.filter((i) => i.due > 0).length} customers`} icon={AlertCircle} tone="danger" />
+        <StatCard label="Today Sales" value={fmt(stats.todaySales)} delta="Real-time" icon={TrendingUp} tone="primary" />
+        <StatCard label="Monthly Revenue" value={fmt(stats.monthlyRevenue)} delta={`${stats.totalOrdersCount} Orders`} icon={Wallet} tone="success" />
+        <StatCard label="Estimated Profit" value={fmt(stats.netProfit)} delta="Est. 25% margin" icon={Coins} tone="warning" />
+        <StatCard label="Pending Due" value={fmt(stats.pendingDue)} delta="From orders" icon={AlertCircle} tone="danger" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        {/* Sales Trend Chart */}
+        <Card className="lg:col-span-2 border-border/40 bg-card/40 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base">Sales Trend · 14 days</CardTitle>
-            <Badge variant="secondary">Revenue & Profit</Badge>
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" /> SALES PERFORMANCE
+            </CardTitle>
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">LIVE TREND</Badge>
           </CardHeader>
-          <CardContent className="h-[260px] pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesTrend} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={11} />
-                <YAxis tickLine={false} axisLine={false} fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }} />
-                
-                <Line type="monotone" dataKey="sales" stroke="var(--primary)" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="profit" stroke="var(--success)" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Top Selling</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[260px] pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topProducts} layout="vertical" margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} fontSize={11} />
-                <YAxis dataKey="name" type="category" width={110} tickLine={false} axisLine={false} fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }} />
-                
-                <Bar dataKey="sold" fill="var(--primary)" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2"><CardTitle className="text-base">Recent Sales</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y">
-              {invoices.slice(0, 5).map((i) =>
-              <li key={i.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/50">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{i.customerName}</p>
-                    <p className="text-xs text-muted-foreground">{i.number} · {i.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">{fmt(i.total)}</p>
-                    <Badge
-                    variant="outline"
-                    className={
-                    i.status === "Paid" ?
-                    "border-[color:var(--success)] text-[color:var(--success)]" :
-                    i.status === "Partial" ?
-                    "border-[color:var(--warning)] text-[color:var(--warning-foreground)]" :
-                    "border-destructive text-destructive"
-                    }>
-                    {i.status}</Badge>
-                  </div>
-                </li>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Low Stock</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y">
-              {lowStock.slice(0, 6).map(({ p, v }) =>
-              <li key={v.id} className="flex items-center justify-between px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium">{p.name} · {v.name}</p>
-                    <p className="text-xs text-muted-foreground">{p.brand} · SKU {v.sku}</p>
-                  </div>
-                  <Badge className={v.stock === 0 ? "bg-destructive" : "bg-[color:var(--warning)] text-[color:var(--warning-foreground)]"}>
-                    {v.stock} left
-                  </Badge>
-                </li>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-base">Recent Expenses</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          <ul className="divide-y">
-            {expenses.slice(0, 5).map((e) =>
-            <li key={e.id} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium">{e.item}</p>
-                  <p className="text-xs text-muted-foreground">{e.date} · {e.brand} · {e.paymentMethod}</p>
-                </div>
-                <p className="text-sm font-semibold text-destructive">- {fmt(e.amount)}</p>
-              </li>
+          <CardContent className="h-[280px] pt-4">
+            {trend.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
+                Insufficient data for trend chart.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trend} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={11} />
+                  <YAxis tickLine={false} axisLine={false} fontSize={11} tickFormatter={(v) => `৳${v}`} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 12,
+                      fontSize: 12
+                    }} />
+                  
+                  <Line 
+                    type="monotone" 
+                    dataKey="sales" 
+                    stroke="var(--primary)" 
+                    strokeWidth={3} 
+                    dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 0 }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             )}
-          </ul>
-        </CardContent>
-      </Card>
-    </div>);
+          </CardContent>
+        </Card>
 
+        {/* Top Customers Report Chart */}
+        <Card className="border-border/40 bg-card/40 backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <PieChart className="w-4 h-4 text-indigo-500" /> TOP CUSTOMERS
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[280px] pt-4">
+            {stats.customerReport.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
+                No customer data available.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.customerReport} layout="vertical" margin={{ left: -10, right: 10, top: 0, bottom: 0 }}>
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" fontSize={10} width={80} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                  />
+                  <Bar dataKey="purchases" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Recent Orders */}
+        <Card className="border-border/40 bg-card/40">
+          <CardHeader className="pb-2 border-b"><CardTitle className="text-sm font-bold uppercase tracking-widest">Recent Activity</CardTitle></CardHeader>
+          <CardContent className="p-0">
+            {stats.recentOrders.length === 0 ? (
+              <div className="p-12 text-center text-muted-foreground text-sm italic">
+                Awaiting first order...
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/40">
+                {stats.recentOrders.map((i) =>
+                <li key={i.id} className="flex items-center justify-between gap-3 px-6 py-4 hover:bg-muted/30 transition-colors">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold truncate">{i.customers?.name || "Walk-in Customer"}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">{i.order_id} · {new Date(i.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black">{fmt(i.total_amount)}</p>
+                      <Badge variant="outline" className="text-[9px] uppercase font-bold h-5 px-1.5">{i.order_status}</Badge>
+                    </div>
+                  </li>
+                )}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Low Stock Combined */}
+        <Card className="border-border/40 bg-card/40">
+          <CardHeader className="pb-2 border-b"><CardTitle className="text-sm font-bold uppercase tracking-widest text-red-500">Inventory Alerts</CardTitle></CardHeader>
+          <CardContent className="p-0">
+            {stats.lowStock.length === 0 ? (
+              <div className="p-12 text-center text-muted-foreground text-sm italic">
+                Inventory is healthy.
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/40">
+                {stats.lowStock.map((p, i) => (
+                  <li key={i} className="flex items-center justify-between px-6 py-4">
+                    <div>
+                      <p className="text-sm font-bold">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">SKU: {p.sku}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="destructive" className="font-bold text-[10px] px-2">{p.stock} Units</Badge>
+                      <p className="text-[9px] text-muted-foreground mt-1 uppercase">Below {p.low_stock_threshold || 10}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>);
 }
