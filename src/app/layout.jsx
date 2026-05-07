@@ -6,11 +6,15 @@ export const metadata = {
   description: "Business Command Center Dashboard",
 };
 
+import { AuthProvider } from "@/hooks/use-auth";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
