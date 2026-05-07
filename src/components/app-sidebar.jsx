@@ -12,7 +12,8 @@ import {
   Users,
   Receipt,
   BarChart3,
-  Settings } from
+  Settings,
+  ShoppingBag } from
 "lucide-react";
 import {
   Sidebar,
@@ -31,6 +32,7 @@ import { createClient } from "@/utils/supabase/client";
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Orders", url: "/dashboard/orders", icon: ShoppingBag },
   { title: "Sales", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Invoices", url: "/dashboard/invoices", icon: FileText },
   { title: "Inventory", url: "/dashboard/inventory", icon: Boxes },

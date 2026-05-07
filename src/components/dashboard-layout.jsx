@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { Bell, Search, LayoutDashboard, ShoppingCart, FileText, Boxes, Receipt } from "lucide-react";
+import { Bell, Search, LayoutDashboard, ShoppingBag, ShoppingCart, FileText, Boxes, Receipt } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const titleMap = {
   "/dashboard": "Dashboard",
+  "/dashboard/orders": "Orders",
   "/dashboard/sales": "Sales",
   "/dashboard/invoices": "Invoices",
   "/dashboard/inventory": "Inventory",
@@ -68,11 +69,12 @@ export function DashboardLayout({ children }) {
 function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const items = [
-  { to: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { to: "/dashboard/sales", label: "Sales", icon: ShoppingCart },
-  { to: "/dashboard/invoices", label: "Invoice", icon: FileText },
-  { to: "/dashboard/inventory", label: "Stock", icon: Boxes },
-  { to: "/dashboard/expenses", label: "Expense", icon: Receipt }];
+    { to: "/dashboard", label: "Home", icon: LayoutDashboard },
+    { to: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+    { to: "/dashboard/invoices", label: "Invoice", icon: FileText },
+    { to: "/dashboard/inventory", label: "Stock", icon: Boxes },
+    { to: "/dashboard/expenses", label: "Expense", icon: Receipt }
+  ];
 
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur grid grid-cols-5">
