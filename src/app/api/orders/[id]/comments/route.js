@@ -5,13 +5,9 @@ import { getOrderComments, addOrderComment } from '@/lib/orders'
 /**
  * Check if user is authenticated and has moderator+ role
  */
-async function requireModeratorRole() {
-  const supabase = await createClient()
-
+async function requireModeratorRole(supabase) {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Unauthorized', status: 401 }
-  }
+  if (!user) return { error: 'Unauthorized', status: 401 }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -27,89 +23,45 @@ async function requireModeratorRole() {
 }
 
 /**
- * GET /api/orders/[id]/comments - Get order comments
+ * GET /api/orders/[id]/comments
  */
 export async function GET(request, { params }) {
   try {
-    const authCheck = await requireModeratorRole()
-    if (authCheck.error) {
-      return NextResponse.json(
-        { error: authCheck.error },
-        { status: authCheck.status }
-      )
-    }
+    const supabase = await createClient()
+    const authCheck = await requireModeratorRole(supabase)
+    if (authCheck.error) return NextResponse.json({ error: authCheck.error }, { status: authCheck.status })
 
     const { id } = params
+    const comments = await getOrderComments(supabase, id)
 
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Order ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const comments = await getOrderComments(id)
-
-    return NextResponse.json({
-      success: true,
-      data: comments
-    })
+    return NextResponse.json({ success: true, data: comments })
   } catch (error) {
-    console.error('Error fetching comments:', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch comments' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
 /**
- * POST /api/orders/[id]/comments - Add comment to order
- * Body: { comment }
+ * POST /api/orders/[id]/comments
  */
 export async function POST(request, { params }) {
   try {
-    const authCheck = await requireModeratorRole()
-    if (authCheck.error) {
-      return NextResponse.json(
-        { error: authCheck.error },
-        { status: authCheck.status }
-      )
-    }
+    const supabase = await createClient()
+    const authCheck = await requireModeratorRole(supabase)
+    if (authCheck.error) return NextResponse.json({ error: authCheck.error }, { status: authCheck.status })
 
     const { id } = params
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Order ID is required' },
-        { status: 400 }
-      )
-    }
-
     const body = await request.json()
 
-    if (!body.comment || typeof body.comment !== 'string' || body.comment.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'comment is required and must be a non-empty string' },
-        { status: 400 }
-      )
-    }
+    if (!body.comment) return NextResponse.json({ error: 'comment is required' }, { status: 400 })
 
-    const comment = await addOrderComment(id, body.comment.trim())
+    const comment = await addOrderComment(supabase, id, body.comment.trim())
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Comment added successfully',
-        data: comment
-      },
-      { status: 201 }
-    )
+    return NextResponse.json({
+      success: true,
+      message: 'Comment added successfully',
+      data: comment
+    }, { status: 201 })
   } catch (error) {
-    console.error('Error adding comment:', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to add comment' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

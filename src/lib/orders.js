@@ -157,6 +157,57 @@ export async function deleteOrder(supabase = defaultSupabase, id) {
 }
 
 /**
+ * Fetch order comments
+ */
+export async function getOrderComments(supabase = defaultSupabase, orderId) {
+  if (typeof supabase === 'string') {
+    orderId = supabase
+    supabase = defaultSupabase
+  }
+
+  const { data, error } = await supabase
+    .from('order_comments')
+    .select(`
+      *,
+      profiles (name, avatar)
+    `)
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+  return data
+}
+
+/**
+ * Add order comment
+ */
+export async function addOrderComment(supabase = defaultSupabase, orderId, comment) {
+  if (typeof supabase === 'string') {
+    comment = orderId
+    orderId = supabase
+    supabase = defaultSupabase
+  }
+
+  const { data: userData } = await supabase.auth.getUser()
+  
+  const { data, error } = await supabase
+    .from('order_comments')
+    .insert({
+      order_id: orderId,
+      comment: comment,
+      created_by: userData.user.id
+    })
+    .select(`
+      *,
+      profiles (name, avatar)
+    `)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+/**
  * Get summary stats for orders
  */
 export async function getOrderStats(supabase = defaultSupabase) {

@@ -1,9 +1,15 @@
-import { supabase } from './supabase'
+import { supabase as defaultSupabase } from './supabase'
 
 /**
  * Fetch paginated products with filters
  */
-export async function getProducts({ status, category_id, search, page = 1, limit = 20 }) {
+export async function getProducts(supabase = defaultSupabase, { status, category_id, search, page = 1, limit = 20 } = {}) {
+  if (supabase && !supabase.from) {
+    const options = supabase
+    supabase = defaultSupabase
+    return getProducts(supabase, options)
+  }
+
   const from = (page - 1) * limit
   const to = from + limit - 1
 
@@ -41,7 +47,12 @@ export async function getProducts({ status, category_id, search, page = 1, limit
 /**
  * Fetch single product by ID
  */
-export async function getProductById(id) {
+export async function getProductById(supabase = defaultSupabase, id) {
+  if (typeof supabase === 'string') {
+    id = supabase
+    supabase = defaultSupabase
+  }
+
   const { data, error } = await supabase
     .from('products')
     .select('*, categories(name)')
@@ -53,79 +64,61 @@ export async function getProductById(id) {
 }
 
 /**
- * Create new product - THE ULTIMATE VERSION
+ * Create new product
  */
-export async function createProduct(productData) {
-  console.log('🚀 [createProduct] Input data:', productData);
-  
-  try {
-    const { data: userData, error: authError } = await supabase.auth.getUser();
-    if (authError || !userData?.user) {
-      throw new Error('Auth session invalid. Please log out and log back in.');
-    }
-
-    // Slug generation
-    const slug = productData.name
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .concat('-', Math.random().toString(36).substring(2, 7));
-
-    // CLEAN PAYLOAD: Only send columns that actually exist in the DB
-    const payload = {
-      name: productData.name,
-      description: productData.description || '',
-      category_id: productData.category_id,
-      brand: productData.brand || '',
-      unit: productData.unit || 'pcs',
-      unit_price: Number(productData.unit_price) || 0,
-      purchase_price: Number(productData.purchase_price) || 0,
-      discount: Number(productData.discount) || 0,
-      stock: Number(productData.stock) || 0,
-      low_stock_threshold: Number(productData.low_stock_threshold) || 10,
-      status: productData.status || 'Active',
-      images: productData.images || [],
-      variants: productData.variants || [],
-      slug: slug,
-      created_by: userData.user.id
-    };
-
-    console.log('📦 [createProduct] Final payload:', payload);
-
-    // Perform Insert with a safety timeout
-    const insertPromise = supabase
-      .from('products')
-      .insert(payload)
-      .select()
-      .single();
-
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Request timed out. Please check your internet connection.')), 25000)
-    );
-
-    const { data: product, error: insertError } = await Promise.race([insertPromise, timeoutPromise]);
-
-    if (insertError) {
-      console.error('❌ [createProduct] Database Error:', insertError);
-      // More user-friendly error messages
-      if (insertError.code === '23503') throw new Error('Selected category is invalid or was deleted.');
-      if (insertError.code === '23505') throw new Error('A product with this name or SKU already exists.');
-      throw new Error(insertError.message || 'Failed to save product.');
-    }
-
-    console.log('✅ [createProduct] SUCCESS:', product);
-    return product;
-    
-  } catch (err) {
-    console.error('💥 [createProduct] CRITICAL:', err);
-    throw err;
+export async function createProduct(supabase = defaultSupabase, productData) {
+  if (typeof supabase === 'object' && !supabase.from) {
+    productData = supabase
+    supabase = defaultSupabase
   }
+
+  const { data: userData, error: authError } = await supabase.auth.getUser()
+  if (authError || !userData?.user) throw new Error('Auth session invalid')
+
+  const slug = productData.name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .concat('-', Math.random().toString(36).substring(2, 7))
+
+  const payload = {
+    name: productData.name,
+    description: productData.description || '',
+    category_id: productData.category_id,
+    brand: productData.brand || '',
+    unit: productData.unit || 'pcs',
+    unit_price: Number(productData.unit_price) || 0,
+    purchase_price: Number(productData.purchase_price) || 0,
+    discount: Number(productData.discount) || 0,
+    stock: Number(productData.stock) || 0,
+    low_stock_threshold: Number(productData.low_stock_threshold) || 10,
+    status: productData.status || 'Active',
+    images: productData.images || [],
+    variants: productData.variants || [],
+    slug: slug,
+    created_by: userData.user.id
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .insert(payload)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
 }
 
 /**
  * Update product
  */
-export async function updateProduct(id, updates) {
+export async function updateProduct(supabase = defaultSupabase, id, updates) {
+  if (typeof supabase === 'string') {
+    updates = id
+    id = supabase
+    supabase = defaultSupabase
+  }
+
   const { data, error } = await supabase
     .from('products')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -140,7 +133,12 @@ export async function updateProduct(id, updates) {
 /**
  * Delete product
  */
-export async function deleteProduct(id) {
+export async function deleteProduct(supabase = defaultSupabase, id) {
+  if (typeof supabase === 'string') {
+    id = supabase
+    supabase = defaultSupabase
+  }
+
   const { error } = await supabase
     .from('products')
     .delete()
@@ -153,11 +151,15 @@ export async function deleteProduct(id) {
 /**
  * Duplicate product
  */
-export async function duplicateProduct(id) {
-  const product = await getProductById(id)
+export async function duplicateProduct(supabase = defaultSupabase, id) {
+  if (typeof supabase === 'string') {
+    id = supabase
+    supabase = defaultSupabase
+  }
+  const product = await getProductById(supabase, id)
   const { id: _, sku: __, slug: ___, created_at: ____, updated_at: _____, categories: ______, ...baseData } = product
   
-  return createProduct({
+  return createProduct(supabase, {
     ...baseData,
     name: `${baseData.name} (Copy)`,
     stock: 0 
@@ -165,9 +167,9 @@ export async function duplicateProduct(id) {
 }
 
 /**
- * Get quick dashboard stats for products
+ * Get product stats
  */
-export async function getProductStats() {
+export async function getProductStats(supabase = defaultSupabase) {
   const { data: products, error } = await supabase
     .from('products')
     .select('stock')
@@ -187,9 +189,36 @@ export async function getProductStats() {
 }
 
 /**
+ * Search products for orders
+ */
+export async function searchProducts(supabase = defaultSupabase, query) {
+  if (typeof supabase === 'string') {
+    query = supabase
+    supabase = defaultSupabase
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, categories(name)')
+    .or(`name.ilike.%${query}%,sku.ilike.%${query}%,brand.ilike.%${query}%`)
+    .limit(10)
+
+  if (error) {
+    console.error('searchProducts error:', error)
+    return []
+  }
+  return data
+}
+
+/**
  * Bulk update product status
  */
-export async function bulkUpdateStatus(ids, status) {
+export async function bulkUpdateStatus(supabase = defaultSupabase, ids, status) {
+  if (Array.isArray(supabase)) {
+    status = ids
+    ids = supabase
+    supabase = defaultSupabase
+  }
   const { data, error } = await supabase
     .from('products')
     .update({ status })
@@ -202,7 +231,11 @@ export async function bulkUpdateStatus(ids, status) {
 /**
  * Bulk delete products
  */
-export async function bulkDeleteProducts(ids) {
+export async function bulkDeleteProducts(supabase = defaultSupabase, ids) {
+  if (Array.isArray(supabase)) {
+    ids = supabase
+    supabase = defaultSupabase
+  }
   const { error } = await supabase
     .from('products')
     .delete()
@@ -215,7 +248,11 @@ export async function bulkDeleteProducts(ids) {
 /**
  * Export products to CSV-friendly format
  */
-export async function exportProductsCSV(filters = {}) {
+export async function exportProductsCSV(supabase = defaultSupabase, filters = {}) {
+  if (supabase && !supabase.from) {
+    filters = supabase
+    supabase = defaultSupabase
+  }
   let query = supabase
     .from('products')
     .select('*, categories(name)')
@@ -235,25 +272,8 @@ export async function exportProductsCSV(filters = {}) {
     'Purchase Price': p.purchase_price,
     'Selling Price': p.unit_price,
     Discount: p.discount,
-    'Effective Price': p.unit_price - p.discount,
+    'Effective Price': (p.unit_price || 0) - (p.discount || 0),
     Stock: p.stock,
     Status: p.stock > 0 ? 'In Stock' : 'Out of Stock'
   }))
-}
-
-/**
- * Search products for orders
- */
-export async function searchProducts(supabase, query) {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*, categories(name)')
-    .or(`name.ilike.%${query}%,sku.ilike.%${query}%,brand.ilike.%${query}%`)
-    .limit(10)
-
-  if (error) {
-    console.error('searchProducts error:', error)
-    return []
-  }
-  return data
 }
