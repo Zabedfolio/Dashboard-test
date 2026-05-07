@@ -49,10 +49,10 @@ export function CustomerLookup({
       if (response.ok) {
         setSearchResults(result.data || [])
       } else {
-        toast.error('Failed to search customers')
+        setSearchResults([])
       }
     } catch (error) {
-      toast.error('Error searching customers')
+      setSearchResults([])
     } finally {
       setIsSearching(false)
     }

@@ -1,9 +1,9 @@
-import { supabase } from './supabase'
+import { supabase as defaultSupabase } from './supabase'
 
 /**
  * Fetch high-level dashboard statistics combined with reports
  */
-export async function getDashboardStats() {
+export async function getDashboardStats(supabase = defaultSupabase) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -29,8 +29,7 @@ export async function getDashboardStats() {
     if (monthlyError) console.warn('Monthly orders fetch error:', monthlyError)
     const monthlyRevenue = (monthlyOrders || []).reduce((sum, o) => sum + Number(o.total_amount), 0)
 
-    // 3. Fetch Low Stock Products - BARE MINIMUM COLUMNS
-    // Avoiding low_stock_threshold and status for now
+    // 3. Fetch Low Stock Products
     const { data: lowStockProds, error: stockError } = await supabase
       .from('products')
       .select('name, sku, stock')
@@ -94,7 +93,7 @@ export async function getDashboardStats() {
 /**
  * Fetch sales trend for charts
  */
-export async function getSalesTrend() {
+export async function getSalesTrend(supabase = defaultSupabase) {
   const { data, error } = await supabase
     .from('orders')
     .select('total_amount, created_at')
@@ -120,6 +119,6 @@ export async function getSalesTrend() {
   }))
 }
 
-export async function getOrderStats() {
-  return getDashboardStats();
+export async function getOrderStats(supabase = defaultSupabase) {
+  return getDashboardStats(supabase);
 }

@@ -240,3 +240,20 @@ export async function exportProductsCSV(filters = {}) {
     Status: p.stock > 0 ? 'In Stock' : 'Out of Stock'
   }))
 }
+
+/**
+ * Search products for orders
+ */
+export async function searchProducts(supabase, query) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, categories(name)')
+    .or(`name.ilike.%${query}%,sku.ilike.%${query}%,brand.ilike.%${query}%`)
+    .limit(10)
+
+  if (error) {
+    console.error('searchProducts error:', error)
+    return []
+  }
+  return data
+}

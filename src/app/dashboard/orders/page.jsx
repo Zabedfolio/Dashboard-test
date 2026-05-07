@@ -22,7 +22,7 @@ export default async function OrdersPage() {
   }
 
   // Fetch stats for today
-  const stats = await getOrderStats()
+  const stats = await getOrderStats(supabase)
 
   return (
     <div className="space-y-6">

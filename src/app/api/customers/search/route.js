@@ -24,7 +24,7 @@ export async function GET(request) {
       })
     }
 
-    const results = await searchCustomers(query)
+    const results = await searchCustomers(supabase, query)
 
     return NextResponse.json({
       success: true,

@@ -24,7 +24,8 @@ export async function GET(request) {
       })
     }
 
-    const results = await searchProducts(query)
+    // Pass the authenticated supabase client to searchProducts
+    const results = await searchProducts(supabase, query)
 
     return NextResponse.json({
       success: true,
