@@ -257,14 +257,4 @@ CREATE POLICY "Service role only for order_id_counter"
 
 -- (Extension enabled at the top of this script)
 
--- ── Sample products (optional seed data) ────────────────────
-INSERT INTO public.products (name, sku, unit_price, stock) VALUES
-  ('Mustard Oil 1L', 'MO-1L', 180, 500),
-  ('Rice Flour 1kg', 'RF-1KG', 65, 300),
-  ('Pure Honey 500g', 'PH-500G', 450, 150),
-  ('Black Cumin 200g', 'BC-200G', 120, 400),
-  ('Turmeric Powder 100g', 'TP-100G', 45, 600),
-  ('Dried Chili 250g', 'DC-250G', 90, 350),
-  ('Coriander Powder 100g', 'CP-100G', 40, 500),
-  ('Gram Flour 500g', 'GF-500G', 75, 250)
-ON CONFLICT (sku) DO NOTHING;
+-- Migration complete
