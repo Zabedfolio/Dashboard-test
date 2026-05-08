@@ -36,17 +36,53 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Invoices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Invoices</h1>
           <p className="text-sm text-muted-foreground mt-1">{invoices.length} total records</p>
         </div>
-        <Button variant="outline" className="border-border/40">
+        <Button variant="outline" className="border-border/40 w-full sm:w-auto">
           <Download className="w-4 h-4 mr-2" /> Export All
         </Button>
       </div>
 
-      <Card className="border-border/40 overflow-hidden bg-card/40">
+      {/* Mobile List View */}
+      <div className="grid gap-3 md:hidden">
+        {invoices.length === 0 ? (
+          <div className="p-10 text-center text-muted-foreground italic bg-card/20 rounded-xl border-2 border-dashed">
+            No invoices found.
+          </div>
+        ) : (
+          invoices.map((inv) => (
+            <div key={inv.id} className="bg-card border border-border/40 rounded-xl p-4 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-xs font-bold text-primary">{inv.order_id}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium mt-0.5">
+                    {new Date(inv.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-[10px] uppercase font-black px-2 py-0.5 ${
+                    inv.payment_status === 'Paid' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                  }`}
+                >
+                  {inv.payment_status}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                <p className="font-semibold text-sm">{inv.customers?.name || 'Walk-in Customer'}</p>
+                <p className="font-black text-lg">{fmt(inv.total_amount)}</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <Card className="hidden md:block border-border/40 overflow-hidden bg-card/40">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -28,34 +28,34 @@ export function ProductFilters({ onFilterChange, categories = [] }) {
   const statusOptions = ['All', 'Active', 'Inactive', 'Out of Stock', 'Low Stock']
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card/30 p-4 rounded-xl border border-border/40">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-4 bg-card/30 p-3 sm:p-4 rounded-xl border border-border/40">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar -mx-1 px-1">
         {statusOptions.map((opt) => (
           <Button
             key={opt}
             variant={status === opt ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setStatus(opt)}
-            className="h-8 rounded-full px-4 text-xs"
+            className="h-8 rounded-full px-4 text-xs shrink-0"
           >
             {opt}
           </Button>
         ))}
       </div>
 
-      <div className="flex items-center gap-3 w-full md:w-auto">
-        <div className="relative flex-1 md:w-64">
+      <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+        <div className="relative w-full sm:flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search products..."
-            className="pl-9 h-9 bg-background/50 border-border/40"
+            className="pl-9 h-9 bg-background/50 border-border/40 w-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
         <Select value={categoryId} onValueChange={setCategoryId}>
-          <SelectTrigger className="w-[180px] h-9 bg-background/50 border-border/40">
+          <SelectTrigger className="w-full sm:w-[180px] h-9 bg-background/50 border-border/40">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>

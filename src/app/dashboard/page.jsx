@@ -64,14 +64,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-10">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
         <div>
-          <h1 className="text-3xl font-black tracking-tight">COMMAND CENTER</h1>
-          <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold opacity-70">Real-time Business Performance</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">COMMAND CENTER</h1>
+          <p className="text-[10px] sm:text-sm text-muted-foreground uppercase tracking-widest font-bold opacity-70">Real-time Business Performance</p>
         </div>
         {errorMsg && (
-          <Badge variant="destructive" className="animate-pulse bg-red-500/10 text-red-500 border-red-500/20">
-            <AlertCircle className="w-3 h-3 mr-1" /> DATABASE ERROR: {errorMsg}
+          <Badge variant="destructive" className="animate-pulse bg-red-500/10 text-red-500 border-red-500/20 self-start sm:self-center">
+            <AlertCircle className="w-3 h-3 mr-1" /> ERROR: {errorMsg}
           </Badge>
         )}
       </div>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard label="Today Sales" value={fmt(stats.todaySales)} delta="Real-time" icon={TrendingUp} tone="primary" />
         <StatCard label="Monthly Revenue" value={fmt(stats.monthlyRevenue)} delta={`${stats.totalOrdersCount} Orders`} icon={Wallet} tone="success" />
-        <StatCard label="Estimated Profit" value={fmt(stats.netProfit)} delta="Est. 25% margin" icon={Coins} tone="warning" />
+        <StatCard label="Est. Profit" value={fmt(stats.netProfit)} delta="25% margin" icon={Coins} tone="warning" />
         <StatCard label="Pending Due" value={fmt(stats.pendingDue)} delta="From orders" icon={AlertCircle} tone="danger" />
       </div>
 
@@ -166,12 +166,12 @@ export default function DashboardPage() {
             ) : (
               <ul className="divide-y divide-border/40">
                 {stats.recentOrders.map((i) =>
-                <li key={i.id} className="flex items-center justify-between gap-3 px-6 py-4 hover:bg-muted/30 transition-colors">
-                    <div className="min-w-0">
+                <li key={i.id} className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 hover:bg-muted/30 transition-colors">
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold truncate">{i.customers?.name || "Walk-in Customer"}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">{i.order_id} · {new Date(i.created_at).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5 truncate">{i.order_id} · {new Date(i.created_at).toLocaleDateString()}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <p className="text-sm font-black">{fmt(i.total_amount)}</p>
                       <Badge variant="outline" className="text-[9px] uppercase font-bold h-5 px-1.5">{i.order_status}</Badge>
                     </div>
@@ -193,12 +193,12 @@ export default function DashboardPage() {
             ) : (
               <ul className="divide-y divide-border/40">
                 {stats.lowStock.map((p, i) => (
-                  <li key={i} className="flex items-center justify-between px-6 py-4">
-                    <div>
-                      <p className="text-sm font-bold">{p.name}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5">SKU: {p.sku}</p>
+                  <li key={i} className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold truncate">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono uppercase mt-0.5 truncate">SKU: {p.sku}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <Badge variant="destructive" className="font-bold text-[10px] px-2">{p.stock} Units</Badge>
                       <p className="text-[9px] text-muted-foreground mt-1 uppercase">Below {p.low_stock_threshold || 10}</p>
                     </div>

@@ -719,22 +719,22 @@ export default function ExpensesPage() {
 
 function SummaryCard({ label, value, count, icon: Icon, color, isAmount = true }) {
   return (
-    <div className="relative group overflow-hidden rounded-xl border bg-card p-4 shadow-sm hover:shadow-md transition-all">
+    <div className="relative group overflow-hidden rounded-xl border bg-card p-3 sm:p-4 shadow-sm hover:shadow-md transition-all">
       <div className={cn("absolute -right-2 -bottom-2 h-16 w-16 opacity-5 group-hover:opacity-10 transition-opacity", color)}>
         <Icon className="h-full w-full" />
       </div>
-      <div className="flex items-center gap-3 mb-3">
-        <div className={cn("p-2 rounded-lg bg-current/10", color)}>
-          <Icon className="h-4 w-4" />
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <div className={cn("p-1.5 sm:p-2 rounded-lg bg-current/10", color)}>
+          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </div>
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">{label}</span>
       </div>
-      <div className="flex items-baseline gap-2">
-        <div className="text-xl font-bold tabular-nums tracking-tight">
+      <div className="flex items-baseline flex-wrap gap-1 sm:gap-2">
+        <div className="text-lg sm:text-xl font-bold tabular-nums tracking-tight">
           {isAmount ? fmt(value) : value}
         </div>
         {count !== undefined && (
-          <span className="text-[10px] font-medium text-muted-foreground">
+          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground">
             ({count} TX)
           </span>
         )}

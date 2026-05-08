@@ -36,34 +36,36 @@ export function DashboardLayout({ children }) {
       <div className="min-h-screen flex w-full bg-muted/30">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 h-14 border-b bg-background/80 backdrop-blur flex items-center gap-3 px-3 md:px-5">
-            <SidebarTrigger />
-            <div className="flex flex-col leading-tight">
-              <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Console</span>
-              <h1 className="text-sm font-semibold">{title}</h1>
+          <header className="sticky top-0 z-30 h-14 border-b bg-background/80 backdrop-blur flex items-center gap-2 px-3 md:px-5">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground truncate hidden sm:block">Console</span>
+              <h1 className="text-sm font-semibold truncate">{title}</h1>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="relative hidden md:block">
+            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+              <div className="relative hidden lg:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search invoices, products..." className="h-9 w-72 pl-8" />
+                <Input placeholder="Search..." className="h-9 w-64 pl-8" />
               </div>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
+              <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
+                <Search className="h-4 w-4" />
               </Button>
-              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-semibold">
+              <Button variant="ghost" size="icon" className="relative h-8 w-8">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive border-2 border-background" />
+              </Button>
+              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-semibold shrink-0">
                 BO
               </div>
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6 max-w-full">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 pb-20 sm:pb-24 md:pb-6 max-w-full overflow-x-hidden">
             {children}
           </main>
           <MobileBottomNav />
         </div>
       </div>
     </SidebarProvider>);
-
 }
 
 function MobileBottomNav() {
