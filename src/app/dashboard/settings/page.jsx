@@ -90,34 +90,37 @@ export default function SettingsPage() {
           <CardTitle className="text-base">Preferences</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Low stock alerts</p>
-              <p className="text-xs text-muted-foreground">Notify when variant stock ≤ 10</p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">Low stock alerts</p>
+              <p className="text-xs text-muted-foreground truncate">Notify when variant stock ≤ 10</p>
             </div>
             <Switch
               checked={settings.lowStockAlerts}
               onCheckedChange={(checked) => handleInputChange("lowStockAlerts", checked)}
+              className="shrink-0"
             />
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Auto-generate invoice numbers</p>
-              <p className="text-xs text-muted-foreground">Sequential numbering</p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">Auto-generate invoice numbers</p>
+              <p className="text-xs text-muted-foreground truncate">Sequential numbering</p>
             </div>
             <Switch
               checked={settings.autoInvoiceNumbers}
               onCheckedChange={(checked) => handleInputChange("autoInvoiceNumbers", checked)}
+              className="shrink-0"
             />
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Print receipt after sale</p>
-              <p className="text-xs text-muted-foreground">Open print dialog</p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">Print receipt after sale</p>
+              <p className="text-xs text-muted-foreground truncate">Open print dialog</p>
             </div>
             <Switch
               checked={settings.printReceipt}
               onCheckedChange={(checked) => handleInputChange("printReceipt", checked)}
+              className="shrink-0"
             />
           </div>
         </CardContent>

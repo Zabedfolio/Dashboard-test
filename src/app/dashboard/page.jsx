@@ -63,15 +63,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">COMMAND CENTER</h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground uppercase tracking-widest font-bold opacity-70">Real-time Business Performance</p>
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500 max-w-full overflow-hidden pb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight truncate uppercase">COMMAND CENTER</h1>
+          <p className="text-[10px] sm:text-sm text-muted-foreground uppercase tracking-widest font-bold opacity-70 truncate">Real-time Performance</p>
         </div>
         {errorMsg && (
-          <Badge variant="destructive" className="animate-pulse bg-red-500/10 text-red-500 border-red-500/20 self-start sm:self-center">
-            <AlertCircle className="w-3 h-3 mr-1" /> ERROR: {errorMsg}
+          <Badge variant="destructive" className="animate-pulse bg-red-500/10 text-red-500 border-red-500/20 shrink-0">
+            <AlertCircle className="w-3 h-3 mr-1" /> ERROR
           </Badge>
         )}
       </div>

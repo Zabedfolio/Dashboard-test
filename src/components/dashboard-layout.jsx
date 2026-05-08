@@ -33,16 +33,16 @@ export function DashboardLayout({ children }) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-muted/30">
+      <div className="min-h-screen flex w-full bg-muted/30 overflow-x-hidden">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 h-14 border-b bg-background/80 backdrop-blur flex items-center gap-2 px-3 md:px-5">
+        <div className="flex-1 flex flex-col min-w-0 relative">
+          <header className="sticky top-0 z-30 h-14 border-b bg-background/80 backdrop-blur flex items-center gap-2 px-3 md:px-5 w-full">
             <SidebarTrigger className="-ml-1" />
-            <div className="flex flex-col leading-tight min-w-0">
+            <div className="flex flex-col leading-tight min-w-0 flex-1">
               <span className="text-[10px] uppercase tracking-wide text-muted-foreground truncate hidden sm:block">Console</span>
-              <h1 className="text-sm font-semibold truncate">{title}</h1>
+              <h1 className="text-sm font-bold truncate pr-2">{title}</h1>
             </div>
-            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
               <div className="relative hidden lg:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search..." className="h-9 w-64 pl-8" />
@@ -54,13 +54,15 @@ export function DashboardLayout({ children }) {
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive border-2 border-background" />
               </Button>
-              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-semibold shrink-0">
+              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-semibold shrink-0 border border-primary/20">
                 BO
               </div>
             </div>
           </header>
-          <main className="flex-1 p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 md:pb-6 w-full min-w-0">
-            {children}
+          <main className="flex-1 w-full max-w-full overflow-x-hidden">
+            <div className="p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 md:pb-6">
+              {children}
+            </div>
           </main>
           <MobileBottomNav />
         </div>

@@ -120,20 +120,20 @@ export default function ProductsPage() {
   }, [])
 
   return (
-    <div className="p-6 space-y-8 max-w-[1600px] mx-auto">
+    <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">Manage your inventory, pricing, and stock levels.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage your inventory, pricing, and stock levels.</p>
         </div>
         <div className="flex items-center gap-2">
           {isAdmin && (
-            <Button variant="outline" onClick={handleExport} className="border-border/40">
+            <Button variant="outline" onClick={handleExport} className="border-border/40 flex-1 sm:flex-none">
               <Download className="w-4 h-4 mr-2" /> Export
             </Button>
           )}
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="bg-indigo-600 hover:bg-indigo-700 flex-1 sm:flex-none">
             <Link href="/dashboard/products/new">
               <Plus className="w-4 h-4 mr-2" /> Add Product
             </Link>
@@ -146,14 +146,14 @@ export default function ProductsPage() {
 
       {/* Filters & View Toggle */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex-1 w-full">
             <ProductFilters 
               categories={categories} 
               onFilterChange={handleFilterChange} 
             />
           </div>
-          <div className="flex items-center gap-2 ml-4 bg-muted/50 p-1 rounded-lg border border-border/40">
+          <div className="flex items-center justify-end gap-2 bg-muted/50 p-1 rounded-lg border border-border/40 self-end lg:self-auto">
             <Button 
               variant={view === 'table' ? 'secondary' : 'ghost'} 
               size="icon" 
@@ -175,17 +175,17 @@ export default function ProductsPage() {
 
         {/* Bulk Actions */}
         {selectedIds.length > 0 && (
-          <div className="flex items-center justify-between p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
-            <div className="text-sm font-medium text-indigo-400 ml-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+            <div className="text-sm font-medium text-indigo-400">
               {selectedIds.length} products selected
             </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatus('Active')} className="h-8 text-xs">Set Active</Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkStatus('Inactive')} className="h-8 text-xs">Set Inactive</Button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatus('Active')} className="h-8 text-xs px-2">Set Active</Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkStatus('Inactive')} className="h-8 text-xs px-2">Set Inactive</Button>
               {isAdmin && (
-                <Button size="sm" variant="destructive" onClick={() => bulkDeleteProducts(selectedIds)} className="h-8 text-xs">Delete</Button>
+                <Button size="sm" variant="destructive" onClick={() => bulkDeleteProducts(selectedIds)} className="h-8 text-xs px-2">Delete</Button>
               )}
-              <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="h-8 text-xs">Cancel</Button>
+              <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="h-8 text-xs px-2">Cancel</Button>
             </div>
           </div>
         )}

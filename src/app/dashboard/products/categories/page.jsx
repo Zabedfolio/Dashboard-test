@@ -29,20 +29,20 @@ export default function CategoriesPage() {
   }, [fetchCats])
 
   return (
-    <div className="p-6 space-y-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" className="rounded-full border-border/40" asChild>
+    <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <Button variant="outline" size="icon" className="rounded-full border-border/40 shrink-0 h-9 w-9 sm:h-10 sm:w-10" asChild>
             <Link href="/dashboard/products">
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
-            <p className="text-sm text-muted-foreground">Organize your products with nested categories.</p>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight truncate">Categories</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">Organize your products with categories.</p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={fetchCats} disabled={isLoading}>
+        <Button variant="ghost" size="icon" onClick={fetchCats} disabled={isLoading} className="self-end sm:self-auto h-9 w-9">
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>
       </div>

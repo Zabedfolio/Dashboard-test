@@ -54,11 +54,11 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Business Reports</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time performance analytics from your database.</p>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Business Reports</h1>
+          <p className="text-sm text-muted-foreground mt-1 truncate">Real-time performance analytics from your database.</p>
         </div>
       </div>
 

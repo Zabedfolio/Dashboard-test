@@ -72,9 +72,9 @@ export default function InvoicesPage() {
                   {inv.payment_status}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                <p className="font-semibold text-sm">{inv.customers?.name || 'Walk-in Customer'}</p>
-                <p className="font-black text-lg">{fmt(inv.total_amount)}</p>
+              <div className="flex items-center justify-between pt-3 border-t border-border/40 gap-2">
+                <p className="font-semibold text-sm truncate flex-1 min-w-0">{inv.customers?.name || 'Walk-in Customer'}</p>
+                <p className="font-black text-lg shrink-0">{fmt(inv.total_amount)}</p>
               </div>
             </div>
           ))

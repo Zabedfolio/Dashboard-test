@@ -44,11 +44,11 @@ export default function SalesPage() {
   const avgSale = invoices.length > 0 ? totalSales / invoices.length : 0;
   
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sales Analysis</h1>
-          <p className="text-sm text-muted-foreground mt-1">Deep dive into your revenue performance.</p>
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Sales Analysis</h1>
+          <p className="text-sm text-muted-foreground mt-1 truncate">Deep dive into your revenue performance.</p>
         </div>
       </div>
       
