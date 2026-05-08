@@ -29,10 +29,10 @@ export function StatCard({
       <CardContent className="p-4 md:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-            <p className="mt-1.5 text-2xl font-semibold tracking-tight truncate">{value}</p>
+            <p className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-muted-foreground/70">{label}</p>
+            <p className="mt-0.5 text-lg sm:text-2xl font-black tracking-tight truncate">{value}</p>
             {delta &&
-            <p className="mt-1 text-xs text-muted-foreground">{delta}</p>
+            <p className="text-[9px] sm:text-xs text-muted-foreground font-medium">{delta}</p>
             }
           </div>
           <div className={cn("h-10 w-10 rounded-lg grid place-items-center shrink-0", toneMap[tone])}>

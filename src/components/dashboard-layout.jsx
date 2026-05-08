@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { Bell, Search, LayoutDashboard, ShoppingBag, ShoppingCart, FileText, Boxes, Receipt } from "lucide-react";
+import { Bell, Search, LayoutDashboard, ShoppingBag, ShoppingCart, FileText, Boxes, Receipt, Package, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -59,7 +59,7 @@ export function DashboardLayout({ children }) {
               </div>
             </div>
           </header>
-          <main className="flex-1 p-3 sm:p-4 md:p-6 pb-20 sm:pb-24 md:pb-6 max-w-full overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 md:pb-6 w-full min-w-0">
             {children}
           </main>
           <MobileBottomNav />
@@ -71,30 +71,50 @@ export function DashboardLayout({ children }) {
 function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const items = [
-    { to: "/dashboard", label: "Home", icon: LayoutDashboard },
     { to: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
-    { to: "/dashboard/invoices", label: "Invoice", icon: FileText },
-    { to: "/dashboard/inventory", label: "Stock", icon: Boxes },
-    { to: "/dashboard/expenses", label: "Expense", icon: Receipt }
+    { to: "/dashboard/products", label: "Products", icon: Package },
+    { to: "/dashboard", label: "Home", icon: LayoutDashboard, isCenter: true },
+    { to: "/dashboard/expenses", label: "Expenses", icon: Receipt },
+    { to: "/dashboard/settings", label: "Settings", icon: Settings }
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur grid grid-cols-5">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur-md h-16 flex items-center justify-around px-2 pb-safe">
       {items.map((it) => {
-        const active = pathname === it.to || pathname.startsWith(`${it.to}/`);
+        const active = it.to === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(it.to);
+        
+        if (it.isCenter) {
+          return (
+            <Link
+              key={it.to}
+              href={it.to}
+              className="relative -top-6 flex flex-col items-center"
+            >
+              <div className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl border-4 border-background transition-all duration-300 ${
+                active ? "bg-primary text-primary-foreground scale-110" : "bg-card text-muted-foreground"
+              }`}>
+                <it.icon className="h-7 w-7" />
+              </div>
+              <span className={`text-[10px] mt-1.5 font-bold uppercase tracking-tighter ${active ? "text-primary" : "text-muted-foreground"}`}>
+                Dashboard
+              </span>
+            </Link>
+          );
+        }
+
         return (
           <Link
             key={it.to}
             href={it.to}
-            className={`flex flex-col items-center gap-0.5 py-2 text-[11px] ${
-            active ? "text-primary" : "text-muted-foreground"}`
-            }>
-            
+            className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors ${
+              active ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
             <it.icon className="h-5 w-5" />
-            {it.label}
-          </Link>);
-
+            <span className="text-[10px] font-bold uppercase tracking-tighter">{it.label}</span>
+          </Link>
+        );
       })}
-    </nav>);
-
+    </nav>
+  );
 }

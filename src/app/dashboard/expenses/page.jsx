@@ -729,8 +729,8 @@ function SummaryCard({ label, value, count, icon: Icon, color, isAmount = true }
         </div>
         <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">{label}</span>
       </div>
-      <div className="flex items-baseline flex-wrap gap-1 sm:gap-2">
-        <div className="text-lg sm:text-xl font-bold tabular-nums tracking-tight">
+      <div className="flex items-baseline flex-wrap gap-1 sm:gap-2 min-w-0">
+        <div className="text-base sm:text-xl font-bold tabular-nums tracking-tight truncate w-full">
           {isAmount ? fmt(value) : value}
         </div>
         {count !== undefined && (
