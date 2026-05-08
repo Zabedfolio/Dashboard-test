@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { Bell, Search, LayoutDashboard, ShoppingBag, ShoppingCart, FileText, Boxes, Receipt, Package, Settings } from "lucide-react";
+import { Search, LayoutDashboard, ShoppingBag, ShoppingCart, FileText, Boxes, Receipt, Package, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { NotificationBar } from "./notification-bar";
+import { GlobalSearch } from "./global-search";
 
 const titleMap = {
   "/dashboard": "Dashboard",
@@ -43,17 +45,11 @@ export function DashboardLayout({ children }) {
               <h1 className="text-sm font-bold truncate pr-2">{title}</h1>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
-              <div className="relative hidden lg:block">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." className="h-9 w-64 pl-8" />
-              </div>
+              <GlobalSearch />
               <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
                 <Search className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="relative h-8 w-8">
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive border-2 border-background" />
-              </Button>
+              <NotificationBar />
               <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-semibold shrink-0 border border-primary/20">
                 BO
               </div>

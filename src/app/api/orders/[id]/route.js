@@ -59,6 +59,19 @@ export async function PATCH(request, { params }) {
 
     const order = await updateOrder(supabase, id, updates)
 
+    // Trigger notification to admins and moderators
+    try {
+      await supabase.rpc('notify_admins_and_moderators', {
+        p_action: 'update',
+        p_entity_type: 'order',
+        p_entity_id: id,
+        p_details: { order_id: order.order_id, updates }
+      })
+    } catch (notificationError) {
+      console.error('Notification error (non-critical):', notificationError)
+      // Don't fail if notification fails
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Order updated successfully',

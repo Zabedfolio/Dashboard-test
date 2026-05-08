@@ -102,6 +102,19 @@ export async function POST(request) {
       notes: body.notes || ''
     })
 
+    // 3. Trigger notification to admins and moderators
+    try {
+      await supabase.rpc('notify_admins_and_moderators', {
+        p_action: 'create',
+        p_entity_type: 'order',
+        p_entity_id: order.id,
+        p_details: { order_id: order.order_id, customer_id: customerId }
+      })
+    } catch (notificationError) {
+      console.error('Notification error (non-critical):', notificationError)
+      // Don't fail the order creation if notification fails
+    }
+
     return NextResponse.json({
       success: true,
       data: order
