@@ -59,10 +59,8 @@ export function DashboardLayout({ children }) {
               </div>
             </div>
           </header>
-          <main className="flex-1 w-full max-w-full overflow-x-hidden">
-            <div className="p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 md:pb-6">
-              {children}
-            </div>
+          <main className="flex-1 w-full max-w-full overflow-x-hidden p-3 sm:p-4 md:p-6 pb-24 sm:pb-28 md:pb-6">
+            {children}
           </main>
           <MobileBottomNav />
         </div>

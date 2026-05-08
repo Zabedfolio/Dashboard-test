@@ -505,7 +505,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
         <SummaryCard label="Today" value={summary.todayTotal} count={summary.todayCount} icon={Receipt} color="text-blue-500" />
         <SummaryCard label="This Month" value={summary.monthTotal} icon={CalendarIcon} color="text-emerald-500" />
         <SummaryCard label="All Time" value={summary.allTimeTotal} icon={DollarSign} color="text-violet-500" />
@@ -513,8 +513,8 @@ export default function ExpensesPage() {
         <SummaryCard label="Daily Average" value={insights.averageDaily} icon={TrendingUp} color="text-pink-500" />
       </div>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="flex flex-col gap-4">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] w-full max-w-full">
+        <div className="flex flex-col gap-4 min-w-0 overflow-hidden">
           {/* Filters & Search */}
           <div className="flex flex-col md:flex-row gap-3 items-center justify-between p-3 rounded-xl border bg-card/50 shadow-sm">
             <div className="relative flex-1 w-full">
@@ -612,7 +612,7 @@ export default function ExpensesPage() {
           </div>
         </div>
 
-        <aside className="flex flex-col gap-6">
+        <aside className="flex flex-col gap-6 min-w-0 overflow-hidden">
           {/* Analytics: Trends */}
           <div className="rounded-xl border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between mb-6">
